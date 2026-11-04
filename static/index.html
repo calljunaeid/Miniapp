@@ -272,8 +272,37 @@ input{
  display:grid;
  place-items:center;
  position:relative;
- transition:transform 1s ease
+ transition:transform 1s ease;
 }
+
+.wheel:after{
+ content:"🎁";
+ font-size:45px;
+ background:#160e22;
+ border:5px solid #d8b4fe;
+ width:85px;
+ height:85px;
+ border-radius:50%;
+ display:grid;
+ place-items:center;
+}
+
+.wheel-label{
+ position:absolute;
+ z-index:2;
+ font-size:12px;
+ font-weight:900;
+ color:white;
+ text-shadow:0 1px 4px #000;
+ pointer-events:none;
+}
+
+.wheel-label.l1{top:13%;right:22%;}
+.wheel-label.l2{top:37%;right:8%;}
+.wheel-label.l3{bottom:25%;right:16%;}
+.wheel-label.l4{bottom:13%;left:22%;}
+.wheel-label.l5{top:37%;left:8%;}
+.wheel-label.l6{top:13%;left:20%;}
 
 .wheel:after{
  content:"🎁";
@@ -625,7 +654,14 @@ input{
     0 spins available
    </span>
 
-   <div class="wheel" id="wheel"></div>
+   <div class="wheel" id="wheel">
+    <span class="wheel-label l1">0.01</span>
+    <span class="wheel-label l2">0.1</span>
+    <span class="wheel-label l3">1</span>
+    <span class="wheel-label l4">10</span>
+    <span class="wheel-label l5">100</span>
+    <span class="wheel-label l6">Nothing</span>
+   </div>
 
    <p class="muted">
     Rewards: Nothing · 0.01 · 0.1 · 1 · 10 · 100 GRAM
