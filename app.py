@@ -129,6 +129,17 @@ def init_db():
         );
         """)
 
+        columns = [
+            row["name"]
+            for row in c.execute("PRAGMA table_info(users)").fetchall()
+        ]
+
+        if "referral_activated" not in columns:
+            c.execute(
+                "ALTER TABLE users ADD COLUMN referral_activated INTEGER DEFAULT 0"
+            )z
+        
+        
         # Keep existing official tasks, if already present.
         c.execute("""
             INSERT OR IGNORE INTO tasks
@@ -268,13 +279,6 @@ async def current_user(request: Request):
                 int(time.time()),
                 0
             ))
-
-            if referrer:
-                c.execute("""
-                    UPDATE users
-                    SET spins=spins+1
-                    WHERE user_id=?
-                """, (referrer,))
 
             c.commit()
 
@@ -433,11 +437,10 @@ async def me(request: Request):
             WHERE user_id=?
         """, (uid,)).fetchone()
 
-        referrals = c.execute("""
-            SELECT COUNT(*) n
-            FROM users
-            WHERE referred_by=?
-        """, (uid,)).fetchone()["n"]
+        referrals = c.execute(
+            "SELECT COUNT(*) n FROM users WHERE referred_by=? AND referral_activated=1",
+            (uid,)
+        ).fetchone()["n"]
 
         spins_today = c.execute("""
             SELECT COUNT(*) n
@@ -1075,27 +1078,33 @@ async def spin(request: Request):
             else f"{reward:g} GRAM"
         )
 
-        c.execute("""
-            UPDATE users
-            SET spins=spins-1,
-                balance=balance+?
-            WHERE user_id=?
-        """, (
-            reward,
-            uid
-        ))
+        c.execute(
+            "UPDATE users SET spins=spins-1,balance=balance+? WHERE user_id=?",
+            (reward, uid)
+        )
 
-        c.execute("""
-            INSERT INTO spin_log(
-                user_id,reward,label,created_at
+        c.execute(
+            "INSERT INTO spin_log(user_id,reward,label,created_at) VALUES(?,?,?,?)",
+            (uid, reward, label, int(time.time()))
+        )
+
+        # FIRST SUCCESSFUL SPIN = REFERRAL ACTIVATION
+        referral = c.execute(
+            "SELECT referred_by, referral_activated FROM users WHERE user_id=?",
+            (uid,)
+        ).fetchone()
+
+        if referral and referral["referred_by"] and not referral["referral_activated"]:
+
+            c.execute(
+                "UPDATE users SET referral_activated=1 WHERE user_id=?",
+                (uid,)
             )
-            VALUES(?,?,?,?)
-        """, (
-            uid,
-            reward,
-            label,
-            int(time.time())
-        ))
+
+            c.execute(
+                "UPDATE users SET spins=spins+1 WHERE user_id=?",
+                (referral["referred_by"],)
+            )
 
         if reward:
             add_commission(c, uid, reward)
