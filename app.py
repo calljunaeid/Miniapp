@@ -137,7 +137,7 @@ def init_db():
         if "referral_activated" not in columns:
             c.execute(
                 "ALTER TABLE users ADD COLUMN referral_activated INTEGER DEFAULT 0"
-            )z
+            )
         
         
         # Keep existing official tasks, if already present.
