@@ -317,6 +317,7 @@ input{
  box-shadow:0 3px 10px #0005;
  pointer-events:none;
  transform:translate(-50%,-50%);
+ transition:transform 7.6s cubic-bezier(.08,.78,.12,1);
 }
 .wheel-label.l1{left:68%;top:32%}
 .wheel-label.l2{left:86%;top:50%}
@@ -1201,6 +1202,10 @@ async function spin(){
 
   // Wait for the full slow, smooth deceleration before revealing the result.
   wheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
+  wheel.querySelectorAll('.wheel-label').forEach(label=>{
+   label.style.transform =
+    'translate(-50%,-50%) rotate(' + (-wheelRotation) + 'deg)';
+  });
   await new Promise(resolve=>setTimeout(resolve,7800));
 
   resultBox.textContent = 'You got ' + d.label + '!';
@@ -1408,7 +1413,8 @@ async function reviewCampaign(id,action){
 
 function referral(){
 
- let username = window.APP_BOT_USERNAME || '';
+ let username = String(window.APP_BOT_USERNAME || appConfig?.bot_username || 'wgramapp')
+  .trim().replace(/^@/, '');
 
  return username
   ?'https://t.me/'+username+'?startapp=ref_'+me.user_id
@@ -1598,7 +1604,7 @@ async function initTon(){
    cfg.app_name;
 
   window.APP_BOT_USERNAME=
-   cfg.bot_username;
+   String(cfg.bot_username || 'wgramapp').trim().replace(/^@/, '');
 
   await refresh();
 
