@@ -495,7 +495,7 @@ input{
    <button class="home-action" onclick="show('wallet');depositInfo()"><span class="action-symbol">＋</span><span>Deposit</span></button>
    <button class="home-action" onclick="show('wallet');withdraw();"><span class="action-symbol">↓</span><span>Withdraw</span></button>
    <button class="home-action" onclick="show('earn')"><span class="action-symbol">▤</span><span>Earn</span></button>
-   <button class="home-action" onclick="show('invite')"><span class="action-symbol">♧</span><span>Invite</span></button>
+   <button class="home-action" onclick="show('invite')"><span>Invite</span></button>
   </div>
 
   <div class="balance-stats">
@@ -569,7 +569,7 @@ input{
 
  <section id="invite" class="page">
 
-  <h1>👥 Invite & Earn</h1>
+  <h1>Invite & Earn</h1>
 
   <div class="card">
 
@@ -612,7 +612,7 @@ input{
 
  <section id="wallet" class="page">
 
-  <h1>💰 Wallet</h1>
+  <h1>Wallet</h1>
 
   <div class="card">
 
@@ -655,7 +655,7 @@ input{
 
  <section id="spin" class="page">
 
-  <h1>🎡 Lucky Spin</h1>
+  <h1>Lucky Spin</h1>
 
   <div class="card" style="text-align:center">
 
@@ -870,20 +870,20 @@ async function refresh(){
  document.getElementById('walletBalance').textContent=
   fmt(me.balance);
 
- document.getElementById('refs').textContent=
-  me.referrals;
+ const refsEl = document.getElementById('refs');
+ if(refsEl) refsEl.textContent = me.referrals;
 
  document.getElementById('inviteRefs').textContent=
   me.referrals;
 
- document.getElementById('spins').textContent=
-  me.spins;
+ const spinsEl = document.getElementById('spins');
+ if(spinsEl) spinsEl.textContent = me.spins;
 
  document.getElementById('spinCount').textContent=
   me.spins+' spins available';
 
- document.getElementById('hello').textContent=
-  'Hi, '+(me.first_name||'there')+' 👋';
+ const helloEl = document.getElementById('hello');
+ if(helloEl) helloEl.textContent = 'Hi, ' + (me.first_name || 'there');
 
  document.getElementById('avatar').textContent=
   (me.first_name||'G').charAt(0).toUpperCase();
@@ -1171,7 +1171,7 @@ async function spin(){
  spinInProgress = true;
  button.disabled = true;
  stage.classList.add('spinning');
- resultBox.textContent = '✨ The wheel is spinning...';
+ resultBox.textContent = 'The wheel is spinning...';
 
  try{
 
@@ -1203,7 +1203,7 @@ async function spin(){
   wheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
   await new Promise(resolve=>setTimeout(resolve,7800));
 
-  resultBox.textContent = '🎉 You got ' + d.label + '!';
+  resultBox.textContent = 'You got ' + d.label + '!';
   await refresh();
 
  }catch(e){
