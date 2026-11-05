@@ -1,0 +1,1642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<title>GRAM EARN</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
+<style>
+:root{
+ --bg:#090710;
+ --panel:#151020;
+ --panel2:#1d1530;
+ --purple:#8b5cf6;
+ --pink:#c084fc;
+ --text:#f7f2ff;
+ --muted:#a99dbb;
+ --line:#302344;
+ --green:#55e6a5;
+}
+
+*{
+ box-sizing:border-box
+}
+
+body{
+ margin:0;
+ background:radial-gradient(circle at 50% -10%,#38205c 0,#100b1a 38%,var(--bg) 75%);
+ color:var(--text);
+ font-family:Arial,sans-serif;
+ min-height:100vh;
+ padding-bottom:88px
+}
+
+.wrap{
+ max-width:520px;
+ margin:auto;
+ padding:18px 16px 25px
+}
+
+.top{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin:8px 0 20px
+}
+
+.brand{
+ font-size:20px;
+ font-weight:900;
+ letter-spacing:1px
+}
+
+.brand span{
+ color:#c4a5fd
+}
+
+.avatar{
+ width:38px;
+ height:38px;
+ border-radius:50%;
+ background:linear-gradient(135deg,#7c3aed,#d8b4fe);
+ display:grid;
+ place-items:center;
+ font-weight:bold
+}
+
+h1{
+ font-size:25px;
+ margin:8px 0
+}
+
+.muted{
+ color:var(--muted);
+ font-size:13px
+}
+
+.card{
+ background:linear-gradient(145deg,#211633,#130f1d);
+ border:1px solid var(--line);
+ border-radius:20px;
+ padding:18px;
+ margin:14px 0;
+ box-shadow:0 12px 35px #0005
+}
+
+.balance{
+ font-size:32px;
+ font-weight:900;
+ margin:10px 0
+}
+
+.purple{
+ color:#c4a5fd
+}
+
+.row{
+ display:flex;
+ gap:12px
+}
+
+.stat{
+ flex:1;
+ background:#ffffff08;
+ border:1px solid #ffffff10;
+ padding:13px;
+ border-radius:15px
+}
+
+.stat b{
+ display:block;
+ font-size:20px;
+ margin-top:6px
+}
+
+.btn{
+ border:0;
+ border-radius:13px;
+ padding:13px 16px;
+ background:linear-gradient(100deg,#7c3aed,#a855f7);
+ color:white;
+ font-weight:800;
+ font-size:14px;
+ width:100%;
+ cursor:pointer;
+ margin-top:10px
+}
+
+.btn.secondary{
+ background:#2a203a;
+ border:1px solid #4b3865
+}
+
+.btn:disabled{
+ opacity:.5;
+ cursor:not-allowed
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:12px
+}
+
+.tile{
+ min-height:118px;
+ display:flex;
+ flex-direction:column;
+ justify-content:space-between;
+ background:linear-gradient(145deg,#281a3e,#171020);
+ border:1px solid #48315f;
+ border-radius:18px;
+ padding:15px;
+ cursor:pointer
+}
+
+.tile .emoji{
+ font-size:30px
+}
+
+.tile b{
+ font-size:15px
+}
+
+.nav{
+ position:fixed;
+ bottom:0;
+ left:0;
+ right:0;
+ background:#100b19ed;
+ backdrop-filter:blur(14px);
+ border-top:1px solid #342447;
+ display:flex;
+ justify-content:center;
+ z-index:10
+}
+
+.navin{
+ max-width:520px;
+ width:100%;
+ display:flex;
+ justify-content:space-around;
+ padding:10px 4px calc(10px + env(safe-area-inset-bottom))
+}
+
+.nav button{
+ background:none;
+ border:0;
+ color:#9f91b3;
+ font-size:11px;
+ display:flex;
+ flex-direction:column;
+ gap:4px;
+ align-items:center
+}
+
+.nav button strong{
+ font-size:20px
+}
+
+.nav button.active{
+ color:#d8b4fe
+}
+
+.page{
+ display:none
+}
+
+.page.active{
+ display:block
+}
+
+.task{
+ display:flex;
+ align-items:center;
+ gap:12px;
+ padding:13px 0;
+ border-bottom:1px solid #ffffff12
+}
+
+.task:last-child{
+ border:0
+}
+
+.task .info{
+ flex:1;
+ min-width:0;
+ overflow-wrap:anywhere
+}
+
+.task small{
+ color:var(--muted)
+}
+
+input{
+ width:100%;
+ background:#0d0914;
+ border:1px solid #49345e;
+ border-radius:12px;
+ padding:13px;
+ color:white;
+ margin:8px 0;
+ outline:none
+}
+
+.pill{
+ font-size:11px;
+ color:#d8b4fe;
+ background:#ffffff12;
+ padding:5px 8px;
+ border-radius:20px
+}
+
+
+.wheel-stage{
+ width:min(78vw,286px);
+ aspect-ratio:1;
+ margin:24px auto 20px;
+ position:relative;
+ display:grid;
+ place-items:center;
+ filter:drop-shadow(0 16px 28px #0008);
+}
+.wheel{
+ width:100%;
+ height:100%;
+ border-radius:50%;
+ position:relative;
+ overflow:hidden;
+ border:7px solid #d9b8ff;
+ background:
+  conic-gradient(
+   #a855f7 0deg 60deg,
+   #241236 60deg 120deg,
+   #c084fc 120deg 180deg,
+   #35184f 180deg 240deg,
+   #8b5cf6 240deg 300deg,
+   #1d102d 300deg 360deg
+  );
+ box-shadow:
+  0 0 0 4px #6d3e9b,
+  0 0 0 8px #ffffff12,
+  0 0 35px #a855f766,
+  inset 0 0 25px #0008;
+ transition:transform 7.6s cubic-bezier(.08,.78,.12,1);
+ will-change:transform;
+}
+.wheel:before{
+ content:"";
+ position:absolute;
+ inset:0;
+ border-radius:50%;
+ background:
+  radial-gradient(circle at 50% 50%,transparent 0 27%,#ffffff12 27.5% 28%,transparent 28.5%),
+  repeating-conic-gradient(from 0deg,#ffffff22 0deg 1deg,transparent 1deg 60deg);
+ pointer-events:none;
+}
+.wheel-label{
+ position:absolute;
+ z-index:2;
+ width:58px;
+ min-height:24px;
+ display:grid;
+ place-items:center;
+ padding:4px 5px;
+ border:1px solid #ffffff35;
+ border-radius:9px;
+ background:#12091dcc;
+ color:#fff;
+ font-size:clamp(10px,2.8vw,12px);
+ font-weight:900;
+ letter-spacing:.1px;
+ text-shadow:0 1px 5px #000;
+ box-shadow:0 3px 10px #0005;
+ pointer-events:none;
+ transform:translate(-50%,-50%);
+}
+.wheel-label.l1{left:68%;top:32%}
+.wheel-label.l2{left:86%;top:50%}
+.wheel-label.l3{left:68%;top:68%}
+.wheel-label.l4{left:32%;top:68%}
+.wheel-label.l5{left:14%;top:50%}
+.wheel-label.l6{left:32%;top:32%}
+.wheel-pointer{
+ position:absolute;
+ z-index:5;
+ top:-11px;
+ left:50%;
+ transform:translateX(-50%);
+ width:0;
+ height:0;
+ border-left:13px solid transparent;
+ border-right:13px solid transparent;
+ border-top:25px solid #fff0b8;
+ filter:drop-shadow(0 3px 5px #000b);
+}
+.wheel-pointer:after{
+ content:"";
+ position:absolute;
+ left:-5px;
+ top:-25px;
+ width:10px;
+ height:10px;
+ border-radius:50%;
+ background:#fff;
+ box-shadow:0 0 12px #fff;
+}
+.wheel-center{
+ position:absolute;
+ z-index:4;
+ width:31%;
+ aspect-ratio:1;
+ border-radius:50%;
+ display:grid;
+ place-items:center;
+ overflow:hidden;
+ background:radial-gradient(circle at 35% 25%,#39234f,#100a19 75%);
+ border:5px solid #e5caff;
+ box-shadow:0 0 0 4px #6d3e9b,0 0 24px #c084fc99,inset 0 2px 10px #fff2;
+ pointer-events:none;
+}
+.wheel-center img{
+ width:76%;
+ height:76%;
+ object-fit:contain;
+ border-radius:50%;
+}
+.wheel-fallback{
+ display:none;
+ width:100%;
+ height:100%;
+ place-items:center;
+ color:#fff;
+ font-size:clamp(28px,9vw,42px);
+ font-weight:1000;
+ text-shadow:0 0 14px #c084fc;
+}
+.wheel-stage.spinning{
+ animation:wheelGlow 1.8s ease-in-out infinite alternate;
+}
+@keyframes wheelGlow{
+ from{filter:drop-shadow(0 12px 22px #8b5cf655)}
+ to{filter:drop-shadow(0 18px 34px #c084fcaa)}
+}
+.notice{
+ font-size:12px;
+ color:#bbaecc;
+ line-height:1.5
+}
+
+.hidden{
+ display:none!important
+}
+
+.campaign-info{
+ display:flex;
+ justify-content:space-between;
+ gap:10px;
+ padding:9px 0;
+ border-bottom:1px solid #ffffff12;
+ font-size:13px
+}
+
+.campaign-info:last-child{
+ border-bottom:0
+}
+
+.admin-title{
+ color:#d8b4fe;
+ font-weight:800;
+ margin-bottom:8px
+}
+
+.status{
+ display:inline-block;
+ background:#ffffff12;
+ color:#d8b4fe;
+ padding:5px 9px;
+ border-radius:20px;
+ font-size:11px;
+ margin-top:5px
+}
+
+/* NEW GRAM EARN HOME + EARN + CHECK-IN DESIGN */
+.brand{display:flex;align-items:center;gap:10px}
+.brand-logo{width:38px;height:38px;object-fit:contain;border-radius:11px;background:#fff}
+.avatar{display:none}
+.home-balance-card{text-align:center;padding:26px 18px 22px;margin-top:8px}
+.home-balance-label{font-size:12px;letter-spacing:1.5px;color:#bba9d2;font-weight:800}
+.home-balance-value{font-size:clamp(34px,9vw,46px);font-weight:900;letter-spacing:-1px;margin:10px 0 2px}
+.gram-mark{width:27px;height:27px;object-fit:contain;vertical-align:-4px;border-radius:50%;background:#fff;margin-right:5px}
+.home-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:15px 0}
+.home-action{border:1px solid #49345e;background:linear-gradient(145deg,#291b3d,#171020);border-radius:15px;min-height:78px;color:#f7f2ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:12px;cursor:pointer}
+.home-action .action-symbol{font-size:22px;color:#d8b4fe;line-height:1}
+.balance-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.balance-stat{background:#ffffff08;border:1px solid #ffffff12;padding:14px;border-radius:15px;min-width:0}
+.balance-stat span{display:block;color:#a99dbb;font-size:11px}
+.balance-stat b{display:block;font-size:17px;margin-top:7px;overflow-wrap:anywhere}
+.earn-heading{font-size:22px;margin:5px 0 16px}
+.official-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:22px}
+.official-card{border:1px solid #49345e;border-radius:18px;padding:15px;background:linear-gradient(145deg,#251832,#15101e);min-width:0}
+.official-symbol{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#c4a5fd;color:#20132f;font-size:20px;margin:0 auto 13px}
+.official-card b{display:block;font-size:14px;line-height:1.3}
+.official-card small{display:block;color:#a99dbb;margin:7px 0 13px;font-size:11px;min-height:28px}
+.join-link{border-top:1px solid #ffffff18;padding-top:11px;color:#d8b4fe;font-size:12px;font-weight:900;cursor:pointer}
+.earn-intro{color:#b9a9ca;font-size:13px;margin:0 0 15px}
+.earn-banner{position:relative;overflow:hidden;min-height:145px;border:1px solid #5b426e;border-radius:19px;margin:13px 0;background:#171020;cursor:pointer;display:flex;align-items:center;padding:18px}
+.earn-banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.62}
+.earn-banner:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#120b1eee 0%,#160d1dcc 53%,#160d1d33 100%)}
+.earn-banner-content{position:relative;z-index:1;max-width:72%}
+.earn-banner .number{color:#d0b4f2;font-size:12px;letter-spacing:1px;margin-bottom:7px}
+.earn-banner b{display:block;font-size:21px;margin-bottom:7px}
+.earn-banner small{display:block;color:#d0c1df;font-size:12px;line-height:1.4}
+.earn-banner .go{display:block;color:#d8b4fe;font-size:12px;font-weight:900;margin-top:12px}
+.checkin-days{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:18px 0}
+.checkin-day{background:#21162f;border:1px solid #49345e;border-radius:14px;padding:13px 5px;text-align:center;min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.checkin-day.done{border-color:#8c61bc;background:#342044}
+.checkin-day.today{border-color:#d8b4fe;box-shadow:0 0 0 1px #d8b4fe55}
+.checkin-day .day-num{font-size:11px;color:#c5afd9;font-weight:900;letter-spacing:.5px}
+.checkin-day .day-reward{font-size:13px;font-weight:900}
+.checkin-day .day-state{font-size:10px;color:#ad9cbd}
+.checkin-day.final{grid-column:span 2;background:linear-gradient(145deg,#49305f,#21152f)}
+.checkin-progress{height:7px;border-radius:20px;background:#ffffff14;overflow:hidden;margin:12px 0}
+.checkin-progress span{height:100%;display:block;background:linear-gradient(90deg,#8b5cf6,#d8b4fe);border-radius:20px}
+.back-link{background:none;border:0;color:#c4a5fd;font-weight:800;padding:7px 0;margin:0 0 10px;cursor:pointer}
+@media(max-width:370px){.home-actions{gap:6px}.home-action{font-size:10px}.official-grid{gap:8px}.earn-banner-content{max-width:78%}}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+ <div class="top">
+  <div class="brand">
+   <img class="brand-logo" src="/static/icon.png" alt="GRAM logo" onerror="this.style.display='none'">
+   <span id="appname">GRAM EARN</span>
+  </div>
+  <div class="avatar" id="avatar">G</div>
+ </div>
+
+ <!-- HOME -->
+ <section id="home" class="page active">
+  <div class="card home-balance-card">
+   <div class="home-balance-label">YOUR GRAM BALANCE</div>
+   <div class="home-balance-value"><img class="gram-mark" src="/static/icon.png" alt="GRAM"> <span id="balance">0.000000</span></div>
+   <div class="muted">Available to use</div>
+  </div>
+
+  <div class="home-actions">
+   <button class="home-action" onclick="show('wallet');depositInfo()"><span class="action-symbol">＋</span><span>Deposit</span></button>
+   <button class="home-action" onclick="show('wallet');withdraw();"><span class="action-symbol">↓</span><span>Withdraw</span></button>
+   <button class="home-action" onclick="show('earn')"><span class="action-symbol">▤</span><span>Earn</span></button>
+   <button class="home-action" onclick="show('invite')"><span class="action-symbol">♧</span><span>Invite</span></button>
+  </div>
+
+  <div class="balance-stats">
+   <div class="balance-stat"><span>Available Balance</span><b><img class="gram-mark" src="/static/icon.png" alt=""> <span id="availableBalance">0.000000</span></b></div>
+   <div class="balance-stat"><span>Total Balance</span><b><img class="gram-mark" src="/static/icon.png" alt=""> <span id="totalBalance">0.000000</span></b></div>
+  </div>
+ </section>
+
+ <!-- EARN -->
+ <section id="earn" class="page">
+  <h1 class="earn-heading">Earn GRAM</h1>
+  <p class="earn-intro">Join official channels and explore rewards and community tasks.</p>
+
+  <div class="official-grid" id="officialChannels">
+   <div class="official-card"><div class="official-symbol">↗</div><b>Official Channel 1</b><small>Follow official updates</small><div class="join-link">JOIN CHANNEL ↗</div></div>
+   <div class="official-card"><div class="official-symbol">↗</div><b>Official Channel 2</b><small>Stay connected with us</small><div class="join-link">JOIN CHANNEL ↗</div></div>
+  </div>
+
+  <div class="earn-banner" onclick="show('checkin')">
+   <img src="/static/checkin-banner.png" alt="" onerror="this.style.display='none'">
+   <div class="earn-banner-content"><div class="number">01</div><b>Daily Check-in</b><small>Check in for 7 days and collect free spins</small><span class="go">GO TO CHECK-IN　→</span></div>
+  </div>
+
+  <div class="earn-banner" onclick="show('spin')">
+   <img src="/static/spin-banner.png" alt="" onerror="this.style.display='none'">
+   <div class="earn-banner-content"><div class="number">02</div><b>Lucky Spin</b><small>Use your free spins and win GRAM rewards</small><span class="go">GO TO SPIN　→</span></div>
+  </div>
+
+  <div class="card">
+   <h3>Community Tasks</h3>
+   <p class="muted">Subscribe to channels added by campaign owners and earn GRAM after verification.</p>
+   <div id="communityTasks"><p class="muted">Loading campaigns...</p></div>
+  </div>
+
+  <div class="card">
+   <h3>Create Subscriber Campaign</h3>
+   <p class="muted">Promote your public Telegram channel. Your campaign appears after admin approval.</p>
+   <div class="campaign-info"><span class="muted">Minimum subscribers</span><b>50</b></div>
+   <div class="campaign-info"><span class="muted">Price per subscriber</span><b>0.012 GRAM</b></div>
+   <div class="campaign-info"><span class="muted">Total campaign cost</span><b class="purple">0.600 GRAM</b></div>
+   <input id="submitChannel" placeholder="@YourPublicChannel" autocomplete="off">
+   <button class="btn" onclick="submitTask()">Submit Campaign</button>
+   <p class="notice">Requirements: public channel, you must be an administrator, and this bot must also be an administrator. 0.600 GRAM is reserved until admin review.</p>
+  </div>
+
+  <div class="card hidden" id="adminCampaignPanel">
+   <div class="admin-title">ADMIN — CAMPAIGN REVIEW</div>
+   <p class="muted">Review submitted campaigns and approve or reject them.</p>
+   <div id="adminCampaignList"><p class="muted">Loading pending campaigns...</p></div>
+  </div>
+ </section>
+
+ <!-- DAILY CHECK-IN -->
+ <section id="checkin" class="page">
+  <button class="back-link" onclick="show('earn')">← Back to Earn</button>
+  <h1>Daily Check-in</h1>
+  <p class="muted">Claim every day for 7 days. Missing one day resets your progress to Day 1.</p>
+  <div class="card">
+   <div class="row" style="justify-content:space-between;align-items:center">
+    <b id="checkinHeadline">Your 7-day streak</b>
+    <span class="pill" id="checkinStatus">Loading...</span>
+   </div>
+   <div class="checkin-progress"><span id="checkinProgress" style="width:0%"></span></div>
+   <div class="checkin-days" id="checkinDays"></div>
+   <button class="btn" id="checkinClaimBtn" onclick="claimCheckin()">CLAIM FREE SPIN</button>
+   <p class="notice" id="checkinNote">Days 1–6 give 1 free spin each. Day 7 gives 3 free spins.</p>
+  </div>
+ </section>
+
+ <!-- INVITE -->
+
+ <section id="invite" class="page">
+
+  <h1>👥 Invite & Earn</h1>
+
+  <div class="card">
+
+   <div class="muted">YOUR REFERRAL REWARD</div>
+
+   <div class="balance">
+    10% <span class="purple">Commission</span>
+   </div>
+
+   <p class="muted">
+    Earn 10% of your invited friends' eligible earnings,
+    plus 1 spin for every successful referral.
+   </p>
+
+   <div class="stat">
+    <span class="muted">Total referrals</span>
+    <b id="inviteRefs">0</b>
+   </div>
+
+   <input
+    id="refLink"
+    readonly
+    value="Loading referral link..."
+   >
+
+   <button class="btn" onclick="copyRef()">
+    Copy referral link
+   </button>
+
+   <button class="btn secondary" onclick="shareRef()">
+    Share with friends
+   </button>
+
+  </div>
+
+ </section>
+
+
+ <!-- WALLET -->
+
+ <section id="wallet" class="page">
+
+  <h1>💰 Wallet</h1>
+
+  <div class="card">
+
+   <div class="muted">YOUR GRAM BALANCE</div>
+
+   <div class="balance">
+    <span id="walletBalance">0</span>
+    <span class="purple">GRAM</span>
+   </div>
+
+   <div id="ton-connect"></div>
+
+   <p class="notice" id="walletStatus">
+    Connect a TON-compatible wallet.
+    Token deposits and automated payouts will be enabled
+    after the GRAM token contract is configured.
+   </p>
+
+   <button class="btn secondary" onclick="depositInfo()">
+    Deposit
+   </button>
+
+   <button class="btn" onclick="withdraw()">
+    Withdraw
+   </button>
+
+   <p class="notice">
+    Withdrawals are manually reviewed.
+    Minimum request: 1 GRAM.
+    Do not send tokens to an address until the official
+    deposit address is published.
+   </p>
+
+  </div>
+
+ </section>
+
+
+ <!-- SPIN -->
+
+ <section id="spin" class="page">
+
+  <h1>🎡 Lucky Spin</h1>
+
+  <div class="card" style="text-align:center">
+
+   <span class="pill" id="spinCount">
+    0 spins available
+   </span>
+
+   <div class="wheel-stage" id="wheelStage">
+    <div class="wheel-pointer"></div>
+    <div class="wheel" id="wheel">
+     <span class="wheel-label l1">0.01</span>
+     <span class="wheel-label l2">0.1</span>
+     <span class="wheel-label l3">1</span>
+     <span class="wheel-label l4">10</span>
+     <span class="wheel-label l5">100</span>
+     <span class="wheel-label l6">Nothing</span>
+    </div>
+    <div class="wheel-center">
+     <img src="/static/icon.png" alt="GRAM" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+     <span class="wheel-fallback">G</span>
+    </div>
+   </div>
+
+   <p class="muted">
+    Rewards: Nothing · 0.01 · 0.1 · 1 · 10 · 100 GRAM
+   </p>
+
+   <button
+    class="btn"
+    id="spinBtn"
+    onclick="spin()"
+   >
+    SPIN NOW
+   </button>
+
+   <p class="notice">
+    Big rewards are extremely rare.
+    Each spin result is decided securely by the server.
+   </p>
+
+   <div id="spinResult" class="purple"></div>
+
+  </div>
+
+ </section>
+
+</div>
+
+
+<!-- BOTTOM NAVIGATION -->
+
+<div class="nav">
+
+ <div class="navin">
+
+  <button
+   class="active"
+   data-page="home"
+   onclick="show('home')"
+  >
+   <strong>⌂</strong>
+   Home
+  </button>
+
+  <button
+   data-page="earn"
+   onclick="show('earn')"
+  >
+   <strong>▣</strong>
+   Earn
+  </button>
+
+  <button
+   data-page="invite"
+   onclick="show('invite')"
+  >
+   <strong>♧</strong>
+   Invite
+  </button>
+
+  <button
+   data-page="wallet"
+   onclick="show('wallet')"
+  >
+   <strong>◈</strong>
+   Wallet
+  </button>
+
+ </div>
+
+</div>
+
+
+<script>
+
+// =========================================================
+// TELEGRAM WEB APP
+// =========================================================
+
+const tg = window.Telegram?.WebApp;
+
+if(tg){
+ tg.ready();
+ tg.expand();
+ tg.setHeaderColor('#100b19');
+ tg.setBackgroundColor('#090710');
+}
+
+
+// =========================================================
+// GLOBAL VARIABLES
+// =========================================================
+
+let initData = tg?.initData || '';
+let me = null;
+let tasks = [];
+let appConfig = null;
+let wheelRotation = 0;
+let spinInProgress = false;
+
+const headers = {
+ 'Content-Type':'application/json',
+ 'X-Telegram-Init-Data':initData
+};
+
+
+// =========================================================
+// API REQUEST
+// =========================================================
+
+async function api(path,opts={}){
+
+ let r = await fetch(path,{
+  ...opts,
+  headers:{
+   ...headers,
+   ...opts.headers
+  }
+ });
+
+ let d = await r.json();
+
+ if(!r.ok){
+  throw new Error(
+   d.detail || 'Request failed'
+  );
+ }
+
+ return d;
+}
+
+
+// =========================================================
+// PAGE NAVIGATION
+// =========================================================
+
+function show(p){
+
+ document.querySelectorAll('.page').forEach(x=>{
+  x.classList.remove('active');
+ });
+
+ document.getElementById(p).classList.add('active');
+
+ document.querySelectorAll('.nav button').forEach(x=>{
+  x.classList.toggle(
+   'active',
+   x.dataset.page===p
+  );
+ });
+
+ if(p==='spin'){
+  document.getElementById('spinCount').textContent=
+   (me?.spins||0)+' spins available';
+ }
+ if(p==='checkin'){ loadCheckin(); }
+
+}
+
+
+// =========================================================
+// WELCOME
+// =========================================================
+
+function continueApp(){
+ show('home');
+}
+
+
+// =========================================================
+// NUMBER FORMAT
+// =========================================================
+
+function fmt(x){
+ return Number(x||0).toFixed(6);
+}
+
+
+// =========================================================
+// REFRESH USER DATA
+// =========================================================
+
+async function refresh(){
+
+ me = await api('/api/me');
+
+ document.getElementById('balance').textContent=
+  fmt(me.balance);
+ document.getElementById('availableBalance').textContent=fmt(me.balance);
+ document.getElementById('totalBalance').textContent=fmt(me.total_earned || me.balance);
+
+ document.getElementById('walletBalance').textContent=
+  fmt(me.balance);
+
+ document.getElementById('refs').textContent=
+  me.referrals;
+
+ document.getElementById('inviteRefs').textContent=
+  me.referrals;
+
+ document.getElementById('spins').textContent=
+  me.spins;
+
+ document.getElementById('spinCount').textContent=
+  me.spins+' spins available';
+
+ document.getElementById('hello').textContent=
+  'Hi, '+(me.first_name||'there')+' 👋';
+
+ document.getElementById('avatar').textContent=
+  (me.first_name||'G').charAt(0).toUpperCase();
+
+ if(me.wallet){
+
+  document.getElementById('walletStatus').textContent=
+   'Connected wallet: '+
+   me.wallet.slice(0,8)+'...'+
+   me.wallet.slice(-6);
+
+ }
+
+ document.getElementById('refLink').value=
+  referral();
+
+}
+
+
+// =========================================================
+// LOAD TASKS
+// =========================================================
+
+async function loadTasks(){
+
+ let d = await api('/api/tasks');
+
+ tasks = d.tasks || [];
+
+ let off = tasks.filter(t=>t.kind==='official');
+ let com = tasks.filter(t=>t.kind!=='official');
+
+ const officialBox=document.getElementById('officialChannels');
+ if(officialBox){
+  const fallback=[
+   {title:'Official Channel 1',channel:'@YourOfficialChannel1'},
+   {title:'Official Channel 2',channel:'@YourOfficialChannel2'}
+  ];
+  const configured=appConfig?.channels||[];
+  const officialItems=configured.length>=2?configured.map((channel,i)=>({title:'Official Channel '+(i+1),channel})):fallback;
+  officialBox.innerHTML=officialItems.slice(0,2).map((t,i)=>`
+   <div class="official-card">
+    <div class="official-symbol">↗</div>
+    <b>${esc(t.title||('Official Channel '+(i+1)))}</b>
+    <small>Follow official updates</small>
+    <div class="join-link" onclick="joinTask('${esc(t.channel)}')">JOIN CHANNEL ↗</div>
+   </div>
+  `).join('');
+ }
+
+ document.getElementById('communityTasks').innerHTML=
+  com.map(taskHtml).join('') ||
+  '<p class="muted">No community campaigns available yet.</p>';
+
+ if(me?.is_admin){
+
+  document.getElementById('adminCampaignPanel')
+   .classList.remove('hidden');
+
+  await loadAdminCampaigns();
+
+ }
+
+}
+
+
+// =========================================================
+// TASK HTML
+// =========================================================
+
+function taskHtml(t){
+
+ let taskId = encodeURIComponent(t.id);
+
+ let channel = esc(t.channel);
+
+ let title = esc(t.title);
+
+ let claimed = t.claimed;
+
+ return `
+  <div class="task">
+
+   <div class="info">
+
+    <b>${title}</b><br>
+
+    <small>
+     ${channel} · ${Number(t.reward).toFixed(3)} GRAM
+    </small>
+
+    ${t.kind==='community'
+     ?'<br><span class="status">Community Campaign</span>'
+     :''}
+
+   </div>
+
+   <div style="min-width:105px">
+
+    <button
+     class="btn secondary"
+     style="margin:0 0 5px;padding:9px"
+     ${claimed?'disabled':''}
+     onclick="joinTask('${channel}')"
+    >
+     Join
+    </button>
+
+    <button
+     class="btn"
+     style="margin:0;padding:9px"
+     ${claimed?'disabled':''}
+     onclick="claimTask('${taskId}')"
+    >
+     ${claimed?'Claimed':'Verify'}
+    </button>
+
+   </div>
+
+  </div>
+ `;
+
+}
+
+
+// =========================================================
+// OPEN TELEGRAM CHANNEL
+// =========================================================
+
+function joinTask(channel){
+
+ if(channel.startsWith('@')){
+
+  tg?.openTelegramLink(
+   'https://t.me/'+channel.slice(1)
+  );
+
+ }else{
+
+  alert('Channel link is not configured.');
+
+ }
+
+}
+
+
+// =========================================================
+// HTML ESCAPE
+// =========================================================
+
+function esc(s){
+
+ return String(s).replace(
+  /[&<>"']/g,
+  c=>({
+   '&':'&amp;',
+   '<':'&lt;',
+   '>':'&gt;',
+   '"':'&quot;',
+   "'":'&#39;'
+  }[c])
+ );
+
+}
+
+
+// =========================================================
+// CLAIM TASK
+// =========================================================
+
+async function claimTask(id){
+
+ try{
+
+  await api(
+   '/api/task/'+id+'/claim',
+   {method:'POST'}
+  );
+
+  alert('Task completed! You received 0.01 GRAM.');
+
+  await refresh();
+
+  await loadTasks();
+
+ }catch(e){
+
+  alert(e.message);
+
+ }
+
+}
+
+
+// =========================================================
+// 7-DAY CHECK-IN
+// =========================================================
+
+async function loadCheckin(){
+ try{
+  const d=await api('/api/checkin');
+  const box=document.getElementById('checkinDays');
+  const dayNow=Number(d.day||1);
+  box.innerHTML=Array.from({length:7},(_,i)=>{
+   const n=i+1;
+   const done=d.claimed_today ? n<=dayNow : n<dayNow;
+   const current=!d.claimed_today && n===dayNow;
+   const reward=n===7?'3 FREE SPINS':'1 FREE SPIN';
+   const cls=(done?' done':'')+(current?' today':'')+(n===7?' final':'');
+   const state=done?'CLAIMED':(current?'READY':'LOCKED');
+   return `<div class="checkin-day${cls}"><span class="day-num">DAY ${n}</span><span class="day-reward">${reward}</span><span class="day-state">${state}</span></div>`;
+  }).join('');
+  document.getElementById('checkinHeadline').textContent='Day '+dayNow+' of 7';
+  document.getElementById('checkinStatus').textContent=d.claimed_today?'CLAIMED TODAY':'READY TO CLAIM';
+  document.getElementById('checkinProgress').style.width=(d.claimed_today?dayNow:dayNow-1)/7*100+'%';
+  const btn=document.getElementById('checkinClaimBtn');
+  btn.disabled=!!d.claimed_today;
+  btn.textContent=d.claimed_today?'CLAIMED TODAY':'CLAIM '+(dayNow===7?'3 FREE SPINS':'1 FREE SPIN');
+  document.getElementById('checkinNote').textContent=d.claimed_today?'Come back tomorrow to continue your 7-day streak. Missing a day resets progress to Day 1.':'Today: Day '+dayNow+' reward is '+(dayNow===7?'3 free spins.':'1 free spin.');
+ }catch(e){
+  document.getElementById('checkinStatus').textContent='Unable to load';
+  document.getElementById('checkinNote').textContent=e.message;
+ }
+}
+
+async function claimCheckin(){
+ const btn=document.getElementById('checkinClaimBtn');
+ btn.disabled=true;
+ try{
+  const d=await api('/api/checkin/claim',{method:'POST'});
+  alert(d.message);
+  await refresh();
+  await loadCheckin();
+ }catch(e){
+  alert(e.message);
+  btn.disabled=false;
+  await loadCheckin();
+ }
+}
+
+
+// =========================================================
+// DAILY SPIN
+// =========================================================
+
+async function dailySpin(){
+
+ try{
+
+  await api(
+   '/api/daily-spin',
+   {method:'POST'}
+  );
+
+  await refresh();
+
+  alert('Daily spin added!');
+
+  show('spin');
+
+ }catch(e){
+
+  alert(e.message);
+
+ }
+
+}
+
+
+// =========================================================
+// SPIN
+// =========================================================
+
+async function spin(){
+
+ if(spinInProgress){
+  return;
+ }
+
+ const button = document.getElementById('spinBtn');
+ const wheel = document.getElementById('wheel');
+ const stage = document.getElementById('wheelStage');
+ const resultBox = document.getElementById('spinResult');
+
+ spinInProgress = true;
+ button.disabled = true;
+ stage.classList.add('spinning');
+ resultBox.textContent = '✨ The wheel is spinning...';
+
+ try{
+
+  // The server remains the only source of truth for the reward.
+  const d = await api('/api/spin',{method:'POST'});
+
+  const reward = Number(d.reward);
+  const targetAngles = {
+   '0.01':330,
+   '0.1':270,
+   '1':210,
+   '10':150,
+   '100':90,
+   '0':30
+  };
+
+  const key = reward === 0 ? '0' : String(reward);
+  const target = targetAngles[key];
+
+  if(typeof target !== 'number'){
+   throw new Error('Unknown spin reward returned by server.');
+  }
+
+  const current = ((wheelRotation % 360) + 360) % 360;
+  const delta = ((target - current + 360) % 360) + (360 * 6);
+  wheelRotation += delta;
+
+  // Wait for the full slow, smooth deceleration before revealing the result.
+  wheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
+  await new Promise(resolve=>setTimeout(resolve,7800));
+
+  resultBox.textContent = '🎉 You got ' + d.label + '!';
+  await refresh();
+
+ }catch(e){
+
+  resultBox.textContent = '';
+  alert(e.message);
+
+ }finally{
+
+  stage.classList.remove('spinning');
+  button.disabled = false;
+  spinInProgress = false;
+
+ }
+
+}
+
+// =========================================================
+// SUBMIT CHANNEL CAMPAIGN
+// =========================================================
+
+async function submitTask(){
+
+ let channel = document
+  .getElementById('submitChannel')
+  .value
+  .trim();
+
+ if(!channel){
+
+  alert('Please enter your public channel username.');
+
+  return;
+
+ }
+
+ if(!channel.startsWith('@')){
+
+  alert('Channel username must start with @');
+
+  return;
+
+ }
+
+ if(!confirm(
+  'Create a campaign for 50 subscribers?\n\n'+
+  'Cost: 0.600 GRAM\n'+
+  'Reward per verified subscriber: 0.01 GRAM'
+ )){
+
+  return;
+
+ }
+
+ try{
+
+  let d = await api(
+   '/api/submit-task',
+   {
+    method:'POST',
+    body:JSON.stringify({
+     channel:channel
+    })
+   }
+  );
+
+  alert(d.message);
+
+  document.getElementById('submitChannel').value='';
+
+  await refresh();
+
+  await loadTasks();
+
+ }catch(e){
+
+  alert(e.message);
+
+ }
+
+}
+
+
+// =========================================================
+// ADMIN — LOAD PENDING CAMPAIGNS
+// =========================================================
+
+async function loadAdminCampaigns(){
+
+ try{
+
+  let d = await api('/api/admin/campaigns');
+
+  let box = document.getElementById(
+   'adminCampaignList'
+  );
+
+  if(!d.campaigns || !d.campaigns.length){
+
+   box.innerHTML=
+    '<p class="muted">No pending campaigns.</p>';
+
+   return;
+
+  }
+
+  box.innerHTML = d.campaigns.map(c=>`
+
+   <div class="task">
+
+    <div class="info">
+
+     <b>${esc(c.title)}</b><br>
+
+     <small>${esc(c.channel)}</small><br>
+
+     <small>Owner ID: ${c.owner_id}</small><br>
+
+     <small>
+      ${c.target} subscribers ·
+      ${Number(c.reserved).toFixed(3)} GRAM
+     </small>
+
+     <br>
+
+     <span class="status">Pending Approval</span>
+
+    </div>
+
+    <div style="min-width:100px">
+
+     <button
+      class="btn"
+      style="margin:0 0 5px;padding:9px"
+      onclick="reviewCampaign(${c.id},'approve')"
+     >
+      Approve
+     </button>
+
+     <button
+      class="btn secondary"
+      style="margin:0;padding:9px"
+      onclick="reviewCampaign(${c.id},'reject')"
+     >
+      Reject
+     </button>
+
+    </div>
+
+   </div>
+
+  `).join('');
+
+ }catch(e){
+
+  console.log('Admin campaign load:',e.message);
+
+ }
+
+}
+
+
+// =========================================================
+// ADMIN — APPROVE / REJECT
+// =========================================================
+
+async function reviewCampaign(id,action){
+
+ let confirmText = action==='approve'
+  ?'Approve and publish this campaign?'
+  :'Reject this campaign and refund 0.600 GRAM?';
+
+ if(!confirm(confirmText)){
+  return;
+ }
+
+ try{
+
+  let d = await api(
+   '/api/admin/campaign/'+id+'/'+action,
+   {method:'POST'}
+  );
+
+  alert(d.message);
+
+  await refresh();
+
+  await loadTasks();
+
+ }catch(e){
+
+  alert(e.message);
+
+ }
+
+}
+
+
+// =========================================================
+// REFERRAL LINK
+// =========================================================
+
+function referral(){
+
+ let username = window.APP_BOT_USERNAME || '';
+
+ return username
+  ?'https://t.me/'+username+'?startapp=ref_'+me.user_id
+  :'Referral link unavailable: set BOT_USERNAME in Railway.';
+
+}
+
+
+// =========================================================
+// COPY REFERRAL
+// =========================================================
+
+function copyRef(){
+
+ let s = referral();
+
+ if(navigator.clipboard){
+
+  navigator.clipboard.writeText(s).then(()=>{
+   alert('Copied!');
+  });
+
+ }else{
+
+  prompt('Copy referral link',s);
+
+ }
+
+}
+
+
+// =========================================================
+// SHARE REFERRAL
+// =========================================================
+
+function shareRef(){
+
+ let s = referral();
+
+ if(tg){
+
+  tg.openTelegramLink(
+   'https://t.me/share/url?url='+
+   encodeURIComponent(s)+
+   '&text='+
+   encodeURIComponent('Join and earn GRAM!')
+  );
+
+ }else{
+
+  copyRef();
+
+ }
+
+}
+
+
+// =========================================================
+// DEPOSIT INFO
+// =========================================================
+
+function depositInfo(){
+
+ alert(
+  'Deposit is not active yet. '+
+  'Admin must configure the verified GRAM token contract '+
+  'and deposit address first.'
+ );
+
+}
+
+
+// =========================================================
+// WITHDRAW
+// =========================================================
+
+async function withdraw(){
+
+ let amount = prompt(
+  'Enter withdrawal amount in GRAM (minimum 1):'
+ );
+
+ if(!amount){
+  return;
+ }
+
+ try{
+
+  let d = await api(
+   '/api/withdraw',
+   {
+    method:'POST',
+    body:JSON.stringify({
+     amount:amount
+    })
+   }
+  );
+
+  alert(d.message);
+
+  await refresh();
+
+ }catch(e){
+
+  alert(e.message);
+
+ }
+
+}
+
+
+// =========================================================
+// TON CONNECT
+// =========================================================
+
+let tonUI = null;
+
+async function initTon(){
+
+ try{
+
+  let cfg = await api('/api/config');
+
+  if(window.TON_CONNECT_UI){
+
+   tonUI = new TON_CONNECT_UI.TonConnectUI({
+
+    manifestUrl:cfg.tonconnect_manifest,
+
+    buttonRootId:'ton-connect'
+
+   });
+
+   tonUI.onStatusChange(async w=>{
+
+    if(w?.account?.address){
+
+     try{
+
+      await api(
+       '/api/wallet',
+       {
+        method:'POST',
+        body:JSON.stringify({
+         address:w.account.address
+        })
+       }
+      );
+
+      await refresh();
+
+     }catch(e){
+
+      alert(e.message);
+
+     }
+
+    }
+
+   });
+
+  }
+
+ }catch(e){
+
+  console.log(e);
+
+ }
+
+}
+
+
+// =========================================================
+// APP INITIALIZATION
+// =========================================================
+
+(async()=>{
+
+ try{
+
+  let cfg = await api('/api/config');
+  appConfig = cfg;
+
+  document.title = cfg.app_name;
+
+  document.getElementById('appname').textContent=
+   cfg.app_name;
+
+  window.APP_BOT_USERNAME=
+   cfg.bot_username;
+
+  await refresh();
+
+  await loadTasks();
+
+  await initTon();
+
+  if(tg?.initData){
+
+   show('home');
+
+  }else{
+
+   document.querySelector('.wrap').innerHTML=`
+    <div class="card">
+     <h2>Open in Telegram</h2>
+     <p class="muted">
+      Please open this Mini App using the button in the Telegram bot.
+     </p>
+    </div>
+   `;
+
+  }
+
+ }catch(e){
+
+  document.querySelector('.wrap').innerHTML=`
+   <div class="card">
+    <h2>Setup required</h2>
+    <p class="muted">${esc(e.message)}</p>
+   </div>
+  `;
+
+ }
+
+})();
+
+</script>
+
+</body>
+</html>
