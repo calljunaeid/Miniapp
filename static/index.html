@@ -254,66 +254,146 @@ input{
  border-radius:20px
 }
 
-.wheel{
- width:220px;
- height:220px;
- border-radius:50%;
- margin:18px auto;
- background:conic-gradient(
-  #a855f7 0 60deg,
-  #27133f 60deg 120deg,
-  #c084fc 120deg 180deg,
-  #3b1c5c 180deg 240deg,
-  #8b5cf6 240deg 300deg,
-  #21102f 300deg
- );
- border:8px solid #d8b4fe;
- box-shadow:0 0 30px #8b5cf655;
+.wheel-stage{
+ width:min(78vw,286px);
+ aspect-ratio:1;
+ margin:24px auto 20px;
+ position:relative;
  display:grid;
  place-items:center;
- position:relative;
- transition:transform 1s ease;
+ filter:drop-shadow(0 16px 28px #0008);
 }
 
-.wheel:after{
- content:"🎁";
- font-size:45px;
- background:#160e22;
- border:5px solid #d8b4fe;
- width:85px;
- height:85px;
+.wheel{
+ width:100%;
+ height:100%;
  border-radius:50%;
- display:grid;
- place-items:center;
+ position:relative;
+ overflow:hidden;
+ border:7px solid #d9b8ff;
+ background:
+  conic-gradient(
+   #a855f7 0deg 60deg,
+   #241236 60deg 120deg,
+   #c084fc 120deg 180deg,
+   #35184f 180deg 240deg,
+   #8b5cf6 240deg 300deg,
+   #1d102d 300deg 360deg
+  );
+ box-shadow:
+  0 0 0 4px #6d3e9b,
+  0 0 0 8px #ffffff12,
+  0 0 35px #a855f766,
+  inset 0 0 25px #0008;
+ transition:transform 7.6s cubic-bezier(.08,.78,.12,1);
+ will-change:transform;
+}
+
+.wheel:before{
+ content:"";
+ position:absolute;
+ inset:0;
+ border-radius:50%;
+ background:
+  radial-gradient(circle at 50% 50%,transparent 0 27%,#ffffff12 27.5% 28%,transparent 28.5%),
+  repeating-conic-gradient(from 0deg,#ffffff22 0deg 1deg,transparent 1deg 60deg);
+ pointer-events:none;
 }
 
 .wheel-label{
  position:absolute;
  z-index:2;
- font-size:12px;
+ width:58px;
+ min-height:24px;
+ display:grid;
+ place-items:center;
+ padding:4px 5px;
+ border:1px solid #ffffff35;
+ border-radius:9px;
+ background:#12091dcc;
+ color:#fff;
+ font-size:clamp(10px,2.8vw,12px);
  font-weight:900;
- color:white;
- text-shadow:0 1px 4px #000;
+ letter-spacing:.1px;
+ text-shadow:0 1px 5px #000;
+ box-shadow:0 3px 10px #0005;
+ pointer-events:none;
+ transform:translate(-50%,-50%);
+}
+
+.wheel-label.l1{left:68%;top:32%}
+.wheel-label.l2{left:86%;top:50%}
+.wheel-label.l3{left:68%;top:68%}
+.wheel-label.l4{left:32%;top:68%}
+.wheel-label.l5{left:14%;top:50%}
+.wheel-label.l6{left:32%;top:32%}
+
+.wheel-pointer{
+ position:absolute;
+ z-index:5;
+ top:-11px;
+ left:50%;
+ transform:translateX(-50%);
+ width:0;
+ height:0;
+ border-left:13px solid transparent;
+ border-right:13px solid transparent;
+ border-top:25px solid #fff0b8;
+ filter:drop-shadow(0 3px 5px #000b);
+}
+
+.wheel-pointer:after{
+ content:"";
+ position:absolute;
+ left:-5px;
+ top:-25px;
+ width:10px;
+ height:10px;
+ border-radius:50%;
+ background:#fff;
+ box-shadow:0 0 12px #fff;
+}
+
+.wheel-center{
+ position:absolute;
+ z-index:4;
+ width:31%;
+ aspect-ratio:1;
+ border-radius:50%;
+ display:grid;
+ place-items:center;
+ overflow:hidden;
+ background:radial-gradient(circle at 35% 25%,#39234f,#100a19 75%);
+ border:5px solid #e5caff;
+ box-shadow:0 0 0 4px #6d3e9b,0 0 24px #c084fc99,inset 0 2px 10px #fff2;
  pointer-events:none;
 }
 
-.wheel-label.l1{top:13%;right:22%;}
-.wheel-label.l2{top:37%;right:8%;}
-.wheel-label.l3{bottom:25%;right:16%;}
-.wheel-label.l4{bottom:13%;left:22%;}
-.wheel-label.l5{top:37%;left:8%;}
-.wheel-label.l6{top:13%;left:20%;}
-
-.wheel:after{
- content:"🎁";
- font-size:45px;
- background:#160e22;
- border:5px solid #d8b4fe;
- width:85px;
- height:85px;
+.wheel-center img{
+ width:76%;
+ height:76%;
+ object-fit:contain;
  border-radius:50%;
- display:grid;
- place-items:center
+}
+
+.wheel-fallback{
+ display:none;
+ width:100%;
+ height:100%;
+ place-items:center;
+ color:#fff;
+ font-size:clamp(28px,9vw,42px);
+ font-weight:1000;
+ text-shadow:0 0 14px #c084fc;
+}
+
+.wheel-stage.spinning{
+ animation:wheelGlow 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes wheelGlow{
+ from{filter:drop-shadow(0 12px 22px #8b5cf655)}
+ to{filter:drop-shadow(0 18px 34px #c084fcaa)}
 }
 
 .notice{
@@ -654,13 +734,20 @@ input{
     0 spins available
    </span>
 
-   <div class="wheel" id="wheel">
-    <span class="wheel-label l1">0.01</span>
-    <span class="wheel-label l2">0.1</span>
-    <span class="wheel-label l3">1</span>
-    <span class="wheel-label l4">10</span>
-    <span class="wheel-label l5">100</span>
-    <span class="wheel-label l6">Nothing</span>
+   <div class="wheel-stage" id="wheelStage">
+    <div class="wheel-pointer"></div>
+    <div class="wheel" id="wheel">
+     <span class="wheel-label l1">0.01</span>
+     <span class="wheel-label l2">0.1</span>
+     <span class="wheel-label l3">1</span>
+     <span class="wheel-label l4">10</span>
+     <span class="wheel-label l5">100</span>
+     <span class="wheel-label l6">Nothing</span>
+    </div>
+    <div class="wheel-center">
+     <img src="/static/icon.png" alt="GRAM" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+     <span class="wheel-fallback">G</span>
+    </div>
    </div>
 
    <p class="muted">
@@ -732,7 +819,6 @@ input{
 
 </div>
 
-
 <script>
 
 // =========================================================
@@ -756,6 +842,8 @@ if(tg){
 let initData = tg?.initData || '';
 let me = null;
 let tasks = [];
+let wheelRotation = 0;
+let spinInProgress = false;
 
 const headers = {
  'Content-Type':'application/json',
@@ -1081,40 +1169,66 @@ async function dailySpin(){
 
 async function spin(){
 
+ if(spinInProgress){
+  return;
+ }
+
+ const button = document.getElementById('spinBtn');
+ const wheel = document.getElementById('wheel');
+ const stage = document.getElementById('wheelStage');
+ const resultBox = document.getElementById('spinResult');
+
+ spinInProgress = true;
+ button.disabled = true;
+ stage.classList.add('spinning');
+ resultBox.textContent = '✨ The wheel is spinning...';
+
  try{
 
-  document.getElementById('spinBtn').disabled=true;
+  // The server remains the only source of truth for the reward.
+  const d = await api('/api/spin',{method:'POST'});
 
-  document.getElementById('spinResult').textContent=
-   'Spinning...';
+  const reward = Number(d.reward);
 
-  document.getElementById('wheel').style.transform=
-   'rotate(1080deg)';
+  // Final wheel positions match the labels under the fixed pointer.
+  const targetAngles = {
+   '0.01':225,
+   '0.1':270,
+   '1':315,
+   '10':45,
+   '100':90,
+   '0':135
+  };
 
-  let d = await api(
-   '/api/spin',
-   {method:'POST'}
-  );
+  const key = reward === 0 ? '0' : String(reward);
+  const target = targetAngles[key];
 
-  setTimeout(()=>{
+  if(typeof target !== 'number'){
+   throw new Error('Unknown spin reward returned by server.');
+  }
 
-   document.getElementById('spinResult').textContent=
-    '🎉 You got '+d.label+'!';
+  const current = ((wheelRotation % 360) + 360) % 360;
+  const delta = ((target - current + 360) % 360) + (360 * 6);
+  wheelRotation += delta;
 
-   document.getElementById('wheel').style.transform=
-    'none';
+  // Slow, smooth rotation with gradual deceleration.
+  wheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
 
-  },900);
+  await new Promise(resolve=>setTimeout(resolve,7800));
 
+  resultBox.textContent = '🎉 You got ' + d.label + '!';
   await refresh();
 
  }catch(e){
 
+  resultBox.textContent = '';
   alert(e.message);
 
  }finally{
 
-  document.getElementById('spinBtn').disabled=false;
+  stage.classList.remove('spinning');
+  button.disabled = false;
+  spinInProgress = false;
 
  }
 
@@ -1185,7 +1299,6 @@ async function submitTask(){
  }
 
 }
-
 
 // =========================================================
 // ADMIN — LOAD PENDING CAMPAIGNS
@@ -1479,7 +1592,6 @@ async function initTon(){
  }
 
 }
-
 
 // =========================================================
 // APP INITIALIZATION
