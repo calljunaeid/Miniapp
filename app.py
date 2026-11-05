@@ -87,6 +87,12 @@ def init_db():
             claimed_at INTEGER
         );
 
+        CREATE TABLE IF NOT EXISTS daily_checkins(
+            user_id INTEGER PRIMARY KEY,
+            last_claim_day TEXT DEFAULT '',
+            streak_day INTEGER DEFAULT 0
+        );
+
         CREATE TABLE IF NOT EXISTS tasks(
             task_id TEXT PRIMARY KEY,
             title TEXT,
@@ -137,6 +143,13 @@ def init_db():
             c.execute(
                 "ALTER TABLE users ADD COLUMN referral_activated INTEGER DEFAULT 0"
             )
+
+        if "total_earned" not in columns:
+            c.execute(
+                "ALTER TABLE users ADD COLUMN total_earned REAL DEFAULT 0"
+            )
+        # Preserve a sensible lifetime total for users created before this field existed.
+        c.execute("UPDATE users SET total_earned=balance WHERE total_earned=0 AND balance>0")
 
         # Keep existing official tasks, if already present.
         c.execute("""
@@ -315,9 +328,10 @@ def add_commission(c, earner_id, amount):
 
         c.execute("""
             UPDATE users
-            SET balance=balance+?
+            SET balance=balance+?, total_earned=total_earned+?
             WHERE user_id=?
         """, (
+            commission,
             commission,
             row["referred_by"]
         ))
@@ -442,6 +456,7 @@ async def me(request: Request):
             "username": u["username"],
             "first_name": u["first_name"],
             "balance": round(u["balance"], 6),
+            "total_earned": round(u["total_earned"] or 0, 6),
             "spins": u["spins"],
             "wallet": u["wallet"],
             "referrals": referrals,
@@ -461,7 +476,7 @@ async def tasks(request: Request):
     with closing(db()) as c:
         rows = c.execute("""
             SELECT * FROM tasks
-            WHERE approved=1
+            WHERE approved=1 AND kind!='official'
             ORDER BY
                 CASE kind WHEN 'official' THEN 0 ELSE 1 END,
                 task_id
@@ -531,6 +546,9 @@ def member_is_valid(member):
 @app.post("/api/task/{task_id}/claim")
 async def claim_task(task_id: str, request: Request):
     uid = await current_user(request)
+
+    if task_id in ("official_1", "official_2"):
+        raise HTTPException(400, "Official channels are join-only and do not offer rewards.")
 
     if not bot_app:
         raise HTTPException(503, "Bot verification is not configured.")
@@ -618,9 +636,9 @@ async def claim_task(task_id: str, request: Request):
 
             c.execute("""
                 UPDATE users
-                SET balance=balance+?
+                SET balance=balance+?, total_earned=total_earned+?
                 WHERE user_id=?
-            """, (TASK_REWARD, uid))
+            """, (TASK_REWARD, TASK_REWARD, uid))
 
             c.execute("""
                 UPDATE campaigns
@@ -659,9 +677,9 @@ async def claim_task(task_id: str, request: Request):
 
         c.execute("""
             UPDATE users
-            SET balance=balance+?
+            SET balance=balance+?, total_earned=total_earned+?
             WHERE user_id=?
-        """, (TASK_REWARD, uid))
+        """, (TASK_REWARD, TASK_REWARD, uid))
 
         add_commission(c, uid, TASK_REWARD)
         c.commit()
@@ -887,9 +905,9 @@ async def spin(request: Request):
 
         c.execute("""
             UPDATE users
-            SET spins=spins-1,balance=balance+?
+            SET spins=spins-1,balance=balance+?,total_earned=total_earned+?
             WHERE user_id=?
-        """, (reward, uid))
+        """, (reward, reward, uid))
 
         c.execute("""
             INSERT INTO spin_log(user_id,reward,label,created_at)
@@ -978,6 +996,100 @@ async def daily_spin(request: Request):
     return {
         "ok": True,
         "message": "Daily spin added. You can spin now."
+    }
+
+
+# =========================================================
+# 7-DAY DAILY CHECK-IN — BANGLADESH LOCAL DAY (UTC+6)
+# =========================================================
+
+def checkin_today():
+    # Use Bangladesh calendar days consistently, independent of server timezone.
+    return time.strftime("%Y-%m-%d", time.gmtime(time.time() + 21600))
+
+
+def checkin_yesterday():
+    return time.strftime("%Y-%m-%d", time.gmtime(time.time() + 21600 - 86400))
+
+
+@app.get("/api/checkin")
+async def checkin_status(request: Request):
+    uid = await current_user(request)
+    today = checkin_today()
+    yesterday = checkin_yesterday()
+
+    with closing(db()) as c:
+        row = c.execute(
+            "SELECT last_claim_day,streak_day FROM daily_checkins WHERE user_id=?",
+            (uid,)
+        ).fetchone()
+
+        last_day = row["last_claim_day"] if row else ""
+        last_streak = int(row["streak_day"] or 0) if row else 0
+        claimed_today = last_day == today
+
+        if claimed_today:
+            display_day = last_streak
+        elif last_day == yesterday:
+            display_day = 1 if last_streak >= 7 else last_streak + 1
+        else:
+            display_day = 1
+
+        return {
+            "today": today,
+            "claimed_today": claimed_today,
+            "day": display_day,
+            "last_claim_day": last_day,
+            "reward_spins": 3 if display_day == 7 else 1
+        }
+
+
+@app.post("/api/checkin/claim")
+async def claim_checkin(request: Request):
+    uid = await current_user(request)
+    today = checkin_today()
+    yesterday = checkin_yesterday()
+
+    with closing(db()) as c:
+        c.execute("BEGIN IMMEDIATE")
+        row = c.execute(
+            "SELECT last_claim_day,streak_day FROM daily_checkins WHERE user_id=?",
+            (uid,)
+        ).fetchone()
+
+        last_day = row["last_claim_day"] if row else ""
+        last_streak = int(row["streak_day"] or 0) if row else 0
+
+        if last_day == today:
+            raise HTTPException(400, "Today's check-in has already been claimed.")
+
+        if last_day == yesterday:
+            streak_day = 1 if last_streak >= 7 else last_streak + 1
+        else:
+            # Missing even one calendar day resets the cycle to Day 1.
+            streak_day = 1
+
+        reward_spins = 3 if streak_day == 7 else 1
+
+        c.execute("""
+            INSERT INTO daily_checkins(user_id,last_claim_day,streak_day)
+            VALUES(?,?,?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                last_claim_day=excluded.last_claim_day,
+                streak_day=excluded.streak_day
+        """, (uid, today, streak_day))
+
+        c.execute(
+            "UPDATE users SET spins=spins+? WHERE user_id=?",
+            (reward_spins, uid)
+        )
+        c.commit()
+
+    return {
+        "ok": True,
+        "day": streak_day,
+        "spins_added": reward_spins,
+        "message": f"Day {streak_day} claimed: {reward_spins} free spin(s) added."
     }
 
 
